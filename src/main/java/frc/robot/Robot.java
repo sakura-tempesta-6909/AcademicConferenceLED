@@ -100,7 +100,9 @@ public class Robot extends TimedRobot {
       timerStarted = true;
     }else{
       if(pushSomeButton()){
-
+        double currentTime = Timer.getFPGATimestamp();
+        double elapsed = currentTime - startTime;
+        int ans = getPushNumber();
       }
     }
   }
@@ -135,7 +137,7 @@ public class Robot extends TimedRobot {
     return xboxController.getAButton() || xboxController.getBackButton() || xboxController.getXButton() || xboxController.getYButton();
   }
 
-  public int pushNumber(){
+  public int getPushNumber(){
     if(xboxController.getAButton()){
       return 1;
     }else if(xboxController.getBButton()){
