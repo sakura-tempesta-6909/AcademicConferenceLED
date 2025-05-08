@@ -8,12 +8,8 @@ import java.util.Random;
 import java.util.Map;
 import java.util.HashMap;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.LEDPattern;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 
 /**
@@ -25,11 +21,29 @@ public class Robot extends TimedRobot {
   // 何個目の実験をするか　例:　イ　→　1   ロ　→　2
   int experimentMode = 1;
 
+  private double startTime = 0.0;
+  private boolean timerStarted = false;
+
 
 
   private AddressableLED led;
   private AddressableLEDBuffer ledBuffer;
   private int ledLength = 30; // LEDの数
+
+  XboxController xboxController;
+
+  // 色の定義
+  private static final Map<String, Color> UseColors = new HashMap<>();
+  static {
+    UseColors.put("orange", new Color(255, 50, 0));
+    UseColors.put("red", new Color(255, 0, 0));
+    UseColors.put("green", new Color(0, 255, 0));
+    UseColors.put("blue", new Color(0, 0, 255));
+    UseColors.put("yellow", new Color(255, 241, 0)); // yerro 修正
+    UseColors.put("darkRed", new Color(235, 97, 16));
+    UseColors.put("lightBlue", new Color(104, 200, 242));
+    UseColors.put("purple", new Color(165, 61, 146));
+  }
 
 
   /**
@@ -43,17 +57,7 @@ public class Robot extends TimedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    // 色の定義
-    Map<String,Color> Colors = new HashMap<>();
-    Colors.put("orange",new Color(255, 50, 0));
-    Colors.put("red",new Color(255, 0, 0));
-    Colors.put("green",new Color(0, 255, 0));
-    Colors.put("blue",new Color(0, 0, 255));
-    Colors.put("yerro",new Color(255, 241, 0));
-    Colors.put("darkRed",new Color(235, 97, 16));
-    Colors.put("lightBlue",new Color(104, 200, 242));
-    Colors.put("purple",new Color(165, 61, 146));
-
+    xboxController = new XboxController(0);
     led = new AddressableLED(0);
     ledBuffer = new AddressableLEDBuffer(ledLength);
 
@@ -84,7 +88,19 @@ public class Robot extends TimedRobot {
   }
 
   public void modeOne(){
-    int colorNumber = setColorNumber();
+    if(!timerStarted){
+      String[] colors = {"orange", "red", "green", "blue"};
+      // 色番号を取得
+      int colorNumber = setColorNumber();
+      // 色の名前を取得
+      String colorName = colors[colorNumber];
+      // 光らせる
+      setsolidLED(UseColors.get(colorName));
+      startTime = Timer.getFPGATimestamp();
+      timerStarted = true;
+    }else{
+      if()
+    }
   }
   public void modeTwo(){
 
@@ -96,14 +112,14 @@ public class Robot extends TimedRobot {
 
   }
 
-  public static int setColorNumber() {
+  public int setColorNumber() {
     Random rand = new Random();
     return rand.nextInt(4) + 1;
   }
 
-  public void setLED(int R,int G,int B){
+  public void setsolidLED(Color color){
     // Create an LED pattern that sets the entire strip to solid red
-    LEDPattern red = LEDPattern.solid(new Color(R,G,B));
+    LEDPattern red = LEDPattern.solid(color);
 
     // Apply the LED pattern to the data buffer
     red.applyTo(ledBuffer);
