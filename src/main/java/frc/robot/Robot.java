@@ -99,7 +99,9 @@ public class Robot extends TimedRobot {
       startTime = Timer.getFPGATimestamp();
       timerStarted = true;
     }else{
-      if()
+      if(pushSomeButton()){
+
+      }
     }
   }
   public void modeTwo(){
@@ -114,7 +116,7 @@ public class Robot extends TimedRobot {
 
   public int setColorNumber() {
     Random rand = new Random();
-    return rand.nextInt(4) + 1;
+    return rand.nextInt(4);
   }
 
   public void setsolidLED(Color color){
@@ -127,6 +129,24 @@ public class Robot extends TimedRobot {
     // Write the data to the LED strip
     led.setData(ledBuffer);
     led.start();
+  }
+
+  public boolean pushSomeButton(){
+    return xboxController.getAButton() || xboxController.getBackButton() || xboxController.getXButton() || xboxController.getYButton();
+  }
+
+  public int pushNumber(){
+    if(xboxController.getAButton()){
+      return 1;
+    }else if(xboxController.getBButton()){
+      return 2;
+    }else if(xboxController.getYButton()){
+      return 3;
+    }else if(xboxController.getXButton()){
+      return  4;
+    }else{
+      return 0;
+    }
   }
 
   /** This function is called once when the robot is disabled. */
