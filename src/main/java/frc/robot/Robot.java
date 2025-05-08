@@ -39,7 +39,7 @@ public class Robot extends TimedRobot {
     UseColors.put("red", new Color(255, 0, 0));
     UseColors.put("green", new Color(0, 255, 0));
     UseColors.put("blue", new Color(0, 0, 255));
-    UseColors.put("yellow", new Color(255, 241, 0)); // yerro 修正
+    UseColors.put("yellow", new Color(255, 241, 0));
     UseColors.put("darkRed", new Color(235, 97, 16));
     UseColors.put("lightBlue", new Color(104, 200, 242));
     UseColors.put("purple", new Color(165, 61, 146));
