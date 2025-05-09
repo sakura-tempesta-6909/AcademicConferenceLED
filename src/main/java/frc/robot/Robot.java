@@ -185,7 +185,40 @@ public class Robot extends TimedRobot {
     }
   }
   public  void modeFour(){
-
+    if(!timerStarted){
+      // パターン番号を取得
+      LEDPatternNumber = setColorNumber();
+      // 光らせる
+      switch (LEDPatternNumber){
+        case 0:
+          setsolidLED(UseColors.get(fourModecolors[0])); // 点灯
+          break;
+        case 1:
+          blinkWhite(UseColors.get(fourModecolors[1]),0.3); // 早い点滅（0.3秒）
+          break;
+        case 2:
+          blinkWhite(UseColors.get(fourModecolors[2]),1.5); // 遅い点滅（1.5秒）
+          break;
+        case 3:
+          scrollWhite(UseColors.get(fourModecolors[3]));   // スクロール
+          break;
+      }
+      startTime = Timer.getFPGATimestamp();
+      timerStarted = true;
+    }else{
+      if(pushSomeButton()){
+        double currentTime = Timer.getFPGATimestamp();
+        double elapsed = currentTime - startTime;
+        int ans = getPushNumber();
+        if(ans == LEDPatternNumber){
+          System.out.println("正解");
+          System.out.println(elapsed);
+        }else{
+          System.out.println("不正解");
+          System.out.println(elapsed);
+        }
+      }
+    }
   }
 
   public int setColorNumber() {
