@@ -23,6 +23,7 @@ public class Robot extends TimedRobot {
 
   private double startTime = 0.0;
   private boolean timerStarted = false;
+  private  int colorNumber;
 
 
 
@@ -85,13 +86,18 @@ public class Robot extends TimedRobot {
       default:
         break;
     }
+
+    // 次の色に変更するまでの処理
+    if(xboxController.getRightBumperButtonPressed()){
+      timerStarted = false;
+    }
   }
 
   public void modeOne(){
     if(!timerStarted){
       String[] colors = {"orange", "red", "green", "blue"};
       // 色番号を取得
-      int colorNumber = setColorNumber();
+      colorNumber = setColorNumber();
       // 色の名前を取得
       String colorName = colors[colorNumber];
       // 光らせる
@@ -103,6 +109,13 @@ public class Robot extends TimedRobot {
         double currentTime = Timer.getFPGATimestamp();
         double elapsed = currentTime - startTime;
         int ans = getPushNumber();
+        if(ans == colorNumber){
+          System.out.println("正解");
+          System.out.println(elapsed);
+        }else{
+          System.out.println("不正解");
+          System.out.println(elapsed);
+        }
       }
     }
   }
