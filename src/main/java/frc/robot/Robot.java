@@ -8,8 +8,12 @@ import java.util.Random;
 import java.util.Map;
 import java.util.HashMap;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -18,7 +22,7 @@ import edu.wpi.first.wpilibj.util.Color;
  */
 public class Robot extends TimedRobot {
   // 何個目の実験をするか　例:　イ　→　1   ロ　→　2
-  int experimentMode = 1;
+  int experimentMode = 4;
 
   String[] oneModecolors = {"orange", "red", "green", "blue"};
   String[] twoModecolors = {"yellow", "darkRed", "lightBlue", "purple"};
@@ -152,24 +156,25 @@ public class Robot extends TimedRobot {
     if(!timerStarted){
       // パターン番号を取得
       LEDPatternNumber = setColorNumber();
+      System.out.println(LEDPatternNumber);
+      startTime = Timer.getFPGATimestamp();
+      timerStarted = true;
+    }else{
       // 光らせる
       switch (LEDPatternNumber){
         case 0:
           setsolidLED(Color.kWhite); // 点灯
           break;
         case 1:
-          blinkWhite(Color.kWhite,0.3); // 早い点滅（0.3秒）
+          blinkWhite(Color.kWhite,0.1); // 早い点滅（0.3秒）
           break;
         case 2:
-          blinkWhite(Color.kWhite,1.5); // 遅い点滅（1.5秒）
+          blinkWhite(Color.kWhite,0.3); // 遅い点滅（1.5秒）
           break;
         case 3:
           scrollWhite(Color.kWhite);   // スクロール
           break;
       }
-      startTime = Timer.getFPGATimestamp();
-      timerStarted = true;
-    }else{
       if(pushSomeButton()){
         double currentTime = Timer.getFPGATimestamp();
         double elapsed = currentTime - startTime;
@@ -188,24 +193,24 @@ public class Robot extends TimedRobot {
     if(!timerStarted){
       // パターン番号を取得
       LEDPatternNumber = setColorNumber();
+      startTime = Timer.getFPGATimestamp();
+      timerStarted = true;
+    }else{
       // 光らせる
       switch (LEDPatternNumber){
         case 0:
           setsolidLED(UseColors.get(fourModecolors[0])); // 点灯
           break;
         case 1:
-          blinkWhite(UseColors.get(fourModecolors[1]),0.3); // 早い点滅（0.3秒）
+          blinkWhite(UseColors.get(fourModecolors[1]),0.1); // 早い点滅（0.3秒）
           break;
         case 2:
-          blinkWhite(UseColors.get(fourModecolors[2]),1.5); // 遅い点滅（1.5秒）
+          blinkWhite(UseColors.get(fourModecolors[2]),0.3); // 遅い点滅（1.5秒）
           break;
         case 3:
           scrollWhite(UseColors.get(fourModecolors[3]));   // スクロール
           break;
       }
-      startTime = Timer.getFPGATimestamp();
-      timerStarted = true;
-    }else{
       if(pushSomeButton()){
         double currentTime = Timer.getFPGATimestamp();
         double elapsed = currentTime - startTime;
@@ -238,7 +243,7 @@ public class Robot extends TimedRobot {
     led.start();
   }
 
-  // 白色の点滅
+  // 点滅
   public void blinkWhite(Color color ,double intervalSeconds) {
     double time = Timer.getFPGATimestamp();
     double period = intervalSeconds * 2;
@@ -246,22 +251,21 @@ public class Robot extends TimedRobot {
     if ((time % period) < intervalSeconds) {
       setsolidLED(color);
     } else {
-      setsolidLED(color);
+      setsolidLED(new Color(0,0,0));
     }
   }
 
   // 白色スクロール
   public void scrollWhite(Color color) {
-    int step = (int)(Timer.getFPGATimestamp() * 10) % ledLength;
-
+    int step = (int)(Timer.getFPGATimestamp() * 100) % ledLength;
     for (int i = 0; i < ledLength; i++) {
       if (i == step) {
-        ledBuffer.setLED(i, color);
+          ledBuffer.setLED(i, color);
       } else {
-        ledBuffer.setLED(i, color);
+        // バックグラウンド色を黒（消灯）に設定
+        ledBuffer.setLED(i, new Color(0, 0, 0));
       }
     }
-
     led.setData(ledBuffer);
   }
 
