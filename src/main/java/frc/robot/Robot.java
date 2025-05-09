@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.Map;
 import java.util.HashMap;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 
@@ -21,11 +20,13 @@ public class Robot extends TimedRobot {
   // 何個目の実験をするか　例:　イ　→　1   ロ　→　2
   int experimentMode = 1;
 
+  String[] oneModecolors = {"orange", "red", "green", "blue"};
+  String[] twoModecolors = {"yellow", "darkRed", "lightBlue", "purple"};
+  String[] fourModecolors = {"yellow", "darkRed", "lightBlue", "purple"};
+
   private double startTime = 0.0;
   private boolean timerStarted = false;
   private  int colorNumber;
-
-
 
   private AddressableLED led;
   private AddressableLEDBuffer ledBuffer;
@@ -95,7 +96,7 @@ public class Robot extends TimedRobot {
 
   public void modeOne(){
     if(!timerStarted){
-      String[] colors = {"orange", "red", "green", "blue"};
+      String[] colors = oneModecolors;
       // 色番号を取得
       colorNumber = setColorNumber();
       // 色の名前を取得
