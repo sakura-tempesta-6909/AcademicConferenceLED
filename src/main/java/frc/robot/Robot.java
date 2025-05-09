@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -22,7 +23,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
  */
 public class Robot extends TimedRobot {
   // 何個目の実験をするか　例:　イ　→　1   ロ　→　2
-  int experimentMode = 4;
+  int experimentMode = 1;
 
   String[] oneModecolors = {"orange", "red", "green", "blue"};
   String[] twoModecolors = {"yellow", "darkRed", "lightBlue", "purple"};
@@ -116,11 +117,11 @@ public class Robot extends TimedRobot {
         double elapsed = currentTime - startTime;
         int ans = getPushNumber();
         if(ans == colorNumber){
-          System.out.println("正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",true);
+          SmartDashboard.putNumber("time",elapsed);
         }else{
-          System.out.println("不正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",false);
+          SmartDashboard.putNumber("time",elapsed);
         }
       }
     }
@@ -143,11 +144,11 @@ public class Robot extends TimedRobot {
         double elapsed = currentTime - startTime;
         int ans = getPushNumber();
         if(ans == colorNumber){
-          System.out.println("正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",true);
+          SmartDashboard.putNumber("time",elapsed);
         }else{
-          System.out.println("不正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",false);
+          SmartDashboard.putNumber("time",elapsed);
         }
       }
     }
@@ -180,11 +181,13 @@ public class Robot extends TimedRobot {
         double elapsed = currentTime - startTime;
         int ans = getPushNumber();
         if(ans == LEDPatternNumber){
+          SmartDashboard.putBoolean("anser",true);
+          SmartDashboard.putNumber("time",elapsed);
           System.out.println("正解");
           System.out.println(elapsed);
         }else{
-          System.out.println("不正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",false);
+          SmartDashboard.putNumber("time",elapsed);
         }
       }
     }
@@ -216,11 +219,11 @@ public class Robot extends TimedRobot {
         double elapsed = currentTime - startTime;
         int ans = getPushNumber();
         if(ans == LEDPatternNumber){
-          System.out.println("正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",true);
+          SmartDashboard.putNumber("time",elapsed);
         }else{
-          System.out.println("不正解");
-          System.out.println(elapsed);
+          SmartDashboard.putBoolean("anser",false);
+          SmartDashboard.putNumber("time",elapsed);
         }
       }
     }
@@ -270,7 +273,7 @@ public class Robot extends TimedRobot {
   }
 
   public boolean pushSomeButton(){
-    return xboxController.getAButton() || xboxController.getBackButton() || xboxController.getXButton() || xboxController.getYButton();
+    return xboxController.getAButton() || xboxController.getBButton() || xboxController.getXButton() || xboxController.getYButton();
   }
 
   public int getPushNumber(){
