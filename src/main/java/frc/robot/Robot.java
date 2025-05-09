@@ -27,6 +27,7 @@ public class Robot extends TimedRobot {
   private double startTime = 0.0;
   private boolean timerStarted = false;
   private  int colorNumber;
+  private int LEDPatternNumber;
 
   private AddressableLED led;
   private AddressableLEDBuffer ledBuffer;
@@ -148,7 +149,40 @@ public class Robot extends TimedRobot {
     }
   }
   public void modeThree(){
-
+    if(!timerStarted){
+      // パターン番号を取得
+      LEDPatternNumber = setColorNumber();
+      // 光らせる
+      switch (LEDPatternNumber){
+        case 0:
+          setsolidLED(Color.kWhite); // 点灯
+          break;
+        case 1:
+          blinkWhite(0.3); // 早い点滅（0.3秒）
+          break;
+        case 2:
+          blinkWhite(1.5); // 遅い点滅（1.5秒）
+          break;
+        case 3:
+          scrollWhite();   // スクロール
+          break;
+      }
+      startTime = Timer.getFPGATimestamp();
+      timerStarted = true;
+    }else{
+      if(pushSomeButton()){
+        double currentTime = Timer.getFPGATimestamp();
+        double elapsed = currentTime - startTime;
+        int ans = getPushNumber();
+        if(ans == LEDPatternNumber){
+          System.out.println("正解");
+          System.out.println(elapsed);
+        }else{
+          System.out.println("不正解");
+          System.out.println(elapsed);
+        }
+      }
+    }
   }
   public  void modeFour(){
 
@@ -171,21 +205,48 @@ public class Robot extends TimedRobot {
     led.start();
   }
 
+  // 白色の点滅
+  public void blinkWhite(double intervalSeconds) {
+    double time = Timer.getFPGATimestamp();
+    double period = intervalSeconds * 2;
+
+    if ((time % period) < intervalSeconds) {
+      setsolidLED(Color.kWhite);
+    } else {
+      setsolidLED(Color.kBlack);
+    }
+  }
+
+  // 白色スクロール
+  public void scrollWhite() {
+    int step = (int)(Timer.getFPGATimestamp() * 10) % ledLength;
+
+    for (int i = 0; i < ledLength; i++) {
+      if (i == step) {
+        ledBuffer.setLED(i, Color.kWhite);
+      } else {
+        ledBuffer.setLED(i, Color.kBlack);
+      }
+    }
+
+    led.setData(ledBuffer);
+  }
+
   public boolean pushSomeButton(){
     return xboxController.getAButton() || xboxController.getBackButton() || xboxController.getXButton() || xboxController.getYButton();
   }
 
   public int getPushNumber(){
     if(xboxController.getAButton()){
-      return 1;
-    }else if(xboxController.getBButton()){
-      return 2;
-    }else if(xboxController.getYButton()){
-      return 3;
-    }else if(xboxController.getXButton()){
-      return  4;
-    }else{
       return 0;
+    }else if(xboxController.getBButton()){
+      return 1;
+    }else if(xboxController.getYButton()){
+      return 2;
+    }else if(xboxController.getXButton()){
+      return  3;
+    }else{
+      return 4;
     }
   }
 
