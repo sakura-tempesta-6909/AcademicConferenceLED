@@ -120,8 +120,32 @@ public class Robot extends TimedRobot {
       }
     }
   }
-  public void modeTwo(){
 
+  public void modeTwo(){
+    if(!timerStarted){
+      String[] colors = twoModecolors;
+      // 色番号を取得
+      colorNumber = setColorNumber();
+      // 色の名前を取得
+      String colorName = colors[colorNumber];
+      // 光らせる
+      setsolidLED(UseColors.get(colorName));
+      startTime = Timer.getFPGATimestamp();
+      timerStarted = true;
+    }else{
+      if(pushSomeButton()){
+        double currentTime = Timer.getFPGATimestamp();
+        double elapsed = currentTime - startTime;
+        int ans = getPushNumber();
+        if(ans == colorNumber){
+          System.out.println("正解");
+          System.out.println(elapsed);
+        }else{
+          System.out.println("不正解");
+          System.out.println(elapsed);
+        }
+      }
+    }
   }
   public void modeThree(){
 
