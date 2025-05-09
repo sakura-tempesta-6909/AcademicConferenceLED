@@ -158,13 +158,13 @@ public class Robot extends TimedRobot {
           setsolidLED(Color.kWhite); // 点灯
           break;
         case 1:
-          blinkWhite(0.3); // 早い点滅（0.3秒）
+          blinkWhite(Color.kWhite,0.3); // 早い点滅（0.3秒）
           break;
         case 2:
-          blinkWhite(1.5); // 遅い点滅（1.5秒）
+          blinkWhite(Color.kWhite,1.5); // 遅い点滅（1.5秒）
           break;
         case 3:
-          scrollWhite();   // スクロール
+          scrollWhite(Color.kWhite);   // スクロール
           break;
       }
       startTime = Timer.getFPGATimestamp();
@@ -206,26 +206,26 @@ public class Robot extends TimedRobot {
   }
 
   // 白色の点滅
-  public void blinkWhite(double intervalSeconds) {
+  public void blinkWhite(Color color ,double intervalSeconds) {
     double time = Timer.getFPGATimestamp();
     double period = intervalSeconds * 2;
 
     if ((time % period) < intervalSeconds) {
-      setsolidLED(Color.kWhite);
+      setsolidLED(color);
     } else {
-      setsolidLED(Color.kBlack);
+      setsolidLED(color);
     }
   }
 
   // 白色スクロール
-  public void scrollWhite() {
+  public void scrollWhite(Color color) {
     int step = (int)(Timer.getFPGATimestamp() * 10) % ledLength;
 
     for (int i = 0; i < ledLength; i++) {
       if (i == step) {
-        ledBuffer.setLED(i, Color.kWhite);
+        ledBuffer.setLED(i, color);
       } else {
-        ledBuffer.setLED(i, Color.kBlack);
+        ledBuffer.setLED(i, color);
       }
     }
 
