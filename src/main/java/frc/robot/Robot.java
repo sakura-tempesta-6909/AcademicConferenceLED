@@ -29,6 +29,7 @@ public class Robot extends TimedRobot {
   String[] oneModecolors = {"orange", "red", "green", "blue"};
   String[] twoModecolors = {"yellow", "darkRed", "lightBlue", "purple"};
   String[] fourModecolors = {"yellow", "darkRed", "lightBlue", "purple"};
+  String[] fiveModecolors = {"yellow_new", "violet", "blue_new", "orange_new"};
 
   private double startTime = 0.0;
   private boolean timerStarted = false;
@@ -56,10 +57,16 @@ private int counter;
     UseColors.put("red", new Color(255, 0, 0));
     UseColors.put("green", new Color(0, 255, 0));
     UseColors.put("blue", new Color(0, 0, 255));
-    UseColors.put("yellow", new Color(255, 241, 0));
-    UseColors.put("darkRed", new Color(235, 97, 16));
-    UseColors.put("lightBlue", new Color(104, 200, 242));
-    UseColors.put("purple", new Color(165, 61, 146));
+
+    UseColors.put("yellow", new Color(255/2, 241/2, 0));
+    UseColors.put("darkRed", new Color(235/2, 97/2, 16/2));
+    UseColors.put("lightBlue", new Color(104/2, 200/2, 242/2));
+    UseColors.put("purple", new Color(165/2, 61/2, 146/2));
+
+    UseColors.put("yellow_new", new Color(225/2,255/2,0/2));
+    UseColors.put("blue_new", new Color(0/2,65/2,255/2));
+    UseColors.put("violet", new Color(150/2,0/2,102/2));
+    UseColors.put("orange_new", new Color(255/2,100/2,0));
   }
 
 
@@ -104,6 +111,9 @@ private int counter;
     } else if (xboxController.getPOV() == 270) {
       experimentMode = 4;
       DataLogManager.log("mode 4");counter=0;
+    } else if (xboxController.getBackButtonPressed()) {
+      experimentMode = 5;
+      DataLogManager.log("mode 5");counter=0;
     }
     SmartDashboard.putString("current mode", "Mode" + experimentMode);
     
@@ -120,6 +130,8 @@ private int counter;
       case 4:
         modeFour();
         break;
+      case 5:
+        modeFive();
       default:
         break;
     }
@@ -319,6 +331,47 @@ private int counter;
               DataLogManager.log(elapsed + ",ng");
             }
           }
+      }
+  }
+
+  public void modeFive() {
+    if(!timerStarted){
+      if (!isWaiting) {
+        waitStartTime = Timer.getFPGATimestamp();
+        waitDuration = 1.0 + new Random().nextDouble(); 
+        isWaiting = true;
+        setsolidLED(new Color(0, 0, 0));
+      } else {
+        if (Timer.getFPGATimestamp() - waitStartTime >= waitDuration) {
+          String[] colors = fiveModecolors;
+          // 色番号を取得
+          colorNumber = setColorNumber();
+          // 色の名前を取得
+          String colorName = colors[colorNumber];
+          counter++;
+          DataLogManager.log(counter + "," + colorName + ",");
+          // 光らせる
+          setsolidLED(UseColors.get(colorName));
+          startTime = Timer.getFPGATimestamp();
+          timerStarted = true;
+          isWaiting = false;
+        } 
+      } 
+    } else {
+        if (pushSomeButtonPressed()){
+          double currentTime = Timer.getFPGATimestamp();
+          double elapsed = currentTime - startTime;
+          int ans = getPushNumber();
+          if (ans == colorNumber){
+            SmartDashboard.putBoolean("anser",true);
+            SmartDashboard.putNumber("time",elapsed);
+            DataLogManager.log(elapsed + ",ok");
+          } else {
+            SmartDashboard.putBoolean("anser",false);
+            SmartDashboard.putNumber("time",elapsed);
+            DataLogManager.log(elapsed + ",ng");
+          }
+        }
       }
   }
 
