@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.Random;
 import java.util.Map;
+import java.lang.ModuleLayer.Controller;
 import java.util.HashMap;
 
 import edu.wpi.first.units.measure.Distance;
@@ -36,7 +37,15 @@ public class Robot extends TimedRobot {
 
   private AddressableLED led;
   private AddressableLEDBuffer ledBuffer;
-  private int ledLength = 30; // LEDの数
+  private int ledLength = 32; // LEDの数
+
+  private double waitStartTime = 0.0;
+  private double waitDuration = 0.0;
+  private boolean isWaiting = false;
+
+  private boolean shouldResetAnser = false;
+  private double resetAnserTime = 0.0;
+private int counter;
 
   XboxController xboxController;
 
@@ -61,6 +70,11 @@ public class Robot extends TimedRobot {
   public Robot() {
   }
 
+  @Override
+  public void robotInit() {
+    DataLogManager.start();
+  }
+
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -77,6 +91,22 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    // SmartDashboard.putNumber("pov", xboxController.getPOV());
+    if (xboxController.getPOV() == 0) {
+      experimentMode = 1;
+      DataLogManager.log("mode 1");counter=0;
+    } else if (xboxController.getPOV() == 90) {
+      experimentMode = 2;
+      DataLogManager.log("mode 2");counter=0;
+    } else if (xboxController.getPOV() == 180) {
+      experimentMode = 3;
+      DataLogManager.log("mode 3");counter=0;
+    } else if (xboxController.getPOV() == 270) {
+      experimentMode = 4;
+      DataLogManager.log("mode 4");counter=0;
+    }
+    SmartDashboard.putString("current mode", "Mode" + experimentMode);
+    
     switch(experimentMode){
       case 1:
         modeOne();
@@ -97,70 +127,117 @@ public class Robot extends TimedRobot {
     // 次の色に変更するまでの処理
     if(xboxController.getRightBumperButtonPressed()){
       timerStarted = false;
+      shouldResetAnser = true;
+      resetAnserTime = Timer.getFPGATimestamp() + 1.0;
+    }
+    if (shouldResetAnser && Timer.getFPGATimestamp() >= resetAnserTime) {
+      SmartDashboard.putBoolean("anser", false);
+      shouldResetAnser = false;
     }
   }
 
   public void modeOne(){
     if(!timerStarted){
-      String[] colors = oneModecolors;
-      // 色番号を取得
-      colorNumber = setColorNumber();
-      // 色の名前を取得
-      String colorName = colors[colorNumber];
-      // 光らせる
-      setsolidLED(UseColors.get(colorName));
-      startTime = Timer.getFPGATimestamp();
-      timerStarted = true;
-    }else{
-      if(pushSomeButton()){
-        double currentTime = Timer.getFPGATimestamp();
-        double elapsed = currentTime - startTime;
-        int ans = getPushNumber();
-        if(ans == colorNumber){
-          SmartDashboard.putBoolean("anser",true);
-          SmartDashboard.putNumber("time",elapsed);
-        }else{
-          SmartDashboard.putBoolean("anser",false);
-          SmartDashboard.putNumber("time",elapsed);
-        }
+      if (!isWaiting) {
+        waitStartTime = Timer.getFPGATimestamp();
+        waitDuration = 1.0 + new Random().nextDouble(); 
+        isWaiting = true;
+        setsolidLED(new Color(0, 0, 0));
+      } else {
+        if (Timer.getFPGATimestamp() - waitStartTime >= waitDuration) {
+          String[] colors = oneModecolors;
+          // 色番号を取得
+          colorNumber = setColorNumber();
+          // 色の名前を取得
+          String colorName = colors[colorNumber];
+          counter++;
+          DataLogManager.log(counter + "," + colorName + ",");
+          // 光らせる
+          setsolidLED(UseColors.get(colorName));
+          startTime = Timer.getFPGATimestamp();
+          timerStarted = true;
+          isWaiting = false;
+          SmartDashboard.putNumber("start time", startTime);
+        } 
       }
-    }
+    } else {
+          if (pushSomeButtonPressed()){
+            double currentTime = Timer.getFPGATimestamp();
+            SmartDashboard.putNumber("current time", currentTime);
+            double elapsed = currentTime - startTime;
+            int ans = getPushNumber();
+            if (ans == colorNumber){
+              SmartDashboard.putBoolean("anser",true);
+              SmartDashboard.putNumber("time",elapsed);
+              DataLogManager.log(elapsed + ",ok");
+            } else {
+              SmartDashboard.putBoolean("anser",false);
+              SmartDashboard.putNumber("time",elapsed);
+              DataLogManager.log(elapsed + ",ng");
+            }
+          }
+      }
   }
 
   public void modeTwo(){
     if(!timerStarted){
-      String[] colors = twoModecolors;
-      // 色番号を取得
-      colorNumber = setColorNumber();
-      // 色の名前を取得
-      String colorName = colors[colorNumber];
-      // 光らせる
-      setsolidLED(UseColors.get(colorName));
-      startTime = Timer.getFPGATimestamp();
-      timerStarted = true;
-    }else{
-      if(pushSomeButton()){
-        double currentTime = Timer.getFPGATimestamp();
-        double elapsed = currentTime - startTime;
-        int ans = getPushNumber();
-        if(ans == colorNumber){
-          SmartDashboard.putBoolean("anser",true);
-          SmartDashboard.putNumber("time",elapsed);
-        }else{
-          SmartDashboard.putBoolean("anser",false);
-          SmartDashboard.putNumber("time",elapsed);
+      if (!isWaiting) {
+        waitStartTime = Timer.getFPGATimestamp();
+        waitDuration = 1.0 + new Random().nextDouble(); 
+        isWaiting = true;
+        setsolidLED(new Color(0, 0, 0));
+      } else {
+        if (Timer.getFPGATimestamp() - waitStartTime >= waitDuration) {
+          String[] colors = twoModecolors;
+          // 色番号を取得
+          colorNumber = setColorNumber();
+          // 色の名前を取得
+          String colorName = colors[colorNumber];
+          counter++;
+          DataLogManager.log(counter + "," + colorName + ",");
+          // 光らせる
+          setsolidLED(UseColors.get(colorName));
+          startTime = Timer.getFPGATimestamp();
+          timerStarted = true;
+          isWaiting = false;
+        } 
+      } 
+    } else {
+        if (pushSomeButtonPressed()){
+          double currentTime = Timer.getFPGATimestamp();
+          double elapsed = currentTime - startTime;
+          int ans = getPushNumber();
+          if (ans == colorNumber){
+            SmartDashboard.putBoolean("anser",true);
+            SmartDashboard.putNumber("time",elapsed);
+            DataLogManager.log(elapsed + ",ok");
+          } else {
+            SmartDashboard.putBoolean("anser",false);
+            SmartDashboard.putNumber("time",elapsed);
+            DataLogManager.log(elapsed + ",ng");
+          }
         }
       }
-    }
   }
+
   public void modeThree(){
     if(!timerStarted){
-      // パターン番号を取得
-      LEDPatternNumber = setColorNumber();
-      System.out.println(LEDPatternNumber);
-      startTime = Timer.getFPGATimestamp();
-      timerStarted = true;
-    }else{
+      if (!isWaiting) {
+        LEDPatternNumber = setColorNumber();
+        waitStartTime = Timer.getFPGATimestamp();
+        waitDuration = 1.0 + new Random().nextDouble(); 
+        isWaiting = true;
+        setsolidLED(new Color(0, 0, 0));
+      } else {
+        if (Timer.getFPGATimestamp() - waitStartTime >= waitDuration) {
+          startTime = Timer.getFPGATimestamp();
+          timerStarted = true;
+          isWaiting = false;
+                    counter++;
+          DataLogManager.log(counter + "," + LEDPatternNumber + ",");
+        } 
+      } 
+    } else {
       // 光らせる
       switch (LEDPatternNumber){
         case 0:
@@ -176,29 +253,42 @@ public class Robot extends TimedRobot {
           scrollWhite(Color.kWhite);   // スクロール
           break;
       }
-      if(pushSomeButton()){
-        double currentTime = Timer.getFPGATimestamp();
-        double elapsed = currentTime - startTime;
-        int ans = getPushNumber();
-        if(ans == LEDPatternNumber){
-          SmartDashboard.putBoolean("anser",true);
-          SmartDashboard.putNumber("time",elapsed);
-          System.out.println("正解");
-          System.out.println(elapsed);
-        }else{
-          SmartDashboard.putBoolean("anser",false);
-          SmartDashboard.putNumber("time",elapsed);
-        }
+      SmartDashboard.putNumber("case", LEDPatternNumber);
+          if (pushSomeButtonPressed()){
+            double currentTime = Timer.getFPGATimestamp();
+            double elapsed = currentTime - startTime;
+            int ans = getPushNumber();
+            if (ans == LEDPatternNumber){
+              SmartDashboard.putBoolean("anser",true);
+              SmartDashboard.putNumber("time",elapsed);
+              DataLogManager.log(elapsed + ",ok");
+            } else {
+              SmartDashboard.putBoolean("anser",false);
+              SmartDashboard.putNumber("time",elapsed);
+              DataLogManager.log(elapsed + ",ng");
+            }
+          }
       }
-    }
   }
-  public  void modeFour(){
+
+  public void modeFour(){
     if(!timerStarted){
-      // パターン番号を取得
-      LEDPatternNumber = setColorNumber();
-      startTime = Timer.getFPGATimestamp();
-      timerStarted = true;
-    }else{
+      if (!isWaiting) {
+        LEDPatternNumber = setColorNumber();
+        waitStartTime = Timer.getFPGATimestamp();
+        waitDuration = 1.0 + new Random().nextDouble(); 
+        isWaiting = true;
+        setsolidLED(new Color(0, 0, 0));
+      } else {
+        if (Timer.getFPGATimestamp() - waitStartTime >= waitDuration) {
+          startTime = Timer.getFPGATimestamp();
+          timerStarted = true;
+          isWaiting = false;
+          counter++;
+          DataLogManager.log(counter + "," + LEDPatternNumber + ","); 
+        } 
+      }
+    } else {
       // 光らせる
       switch (LEDPatternNumber){
         case 0:
@@ -214,19 +304,22 @@ public class Robot extends TimedRobot {
           scrollWhite(UseColors.get(fourModecolors[3]));   // スクロール
           break;
       }
-      if(pushSomeButton()){
-        double currentTime = Timer.getFPGATimestamp();
-        double elapsed = currentTime - startTime;
-        int ans = getPushNumber();
-        if(ans == LEDPatternNumber){
-          SmartDashboard.putBoolean("anser",true);
-          SmartDashboard.putNumber("time",elapsed);
-        }else{
-          SmartDashboard.putBoolean("anser",false);
-          SmartDashboard.putNumber("time",elapsed);
-        }
+      SmartDashboard.putNumber("case", LEDPatternNumber);
+          if (pushSomeButtonPressed()){
+            double currentTime = Timer.getFPGATimestamp();
+            double elapsed = currentTime - startTime;
+            int ans = getPushNumber();
+            if (ans == LEDPatternNumber){
+              SmartDashboard.putBoolean("anser",true);
+              SmartDashboard.putNumber("time",elapsed);
+              DataLogManager.log(elapsed + ",ok");
+            } else {
+              SmartDashboard.putBoolean("anser",false);
+              SmartDashboard.putNumber("time",elapsed);
+              DataLogManager.log(elapsed + ",ng");
+            }
+          }
       }
-    }
   }
 
   public int setColorNumber() {
@@ -272,24 +365,31 @@ public class Robot extends TimedRobot {
     led.setData(ledBuffer);
   }
 
-  public boolean pushSomeButton(){
-    return xboxController.getAButton() || xboxController.getBButton() || xboxController.getXButton() || xboxController.getYButton();
+  public boolean pushSomeButtonPressed(){
+    return xboxController.getAButtonPressed() || xboxController.getBButtonPressed() || xboxController.getXButtonPressed() || xboxController.getYButtonPressed();
   }
 
   public int getPushNumber(){
+    String pressedButton = "None";
+    int buttonNumber = 4;
     if(xboxController.getAButton()){
-      return 0;
+      pressedButton = "橙・黄色";
+      buttonNumber = 0;
     }else if(xboxController.getBButton()){
-      return 1;
+      pressedButton = "青・ダークレッド";
+      buttonNumber = 1;
     }else if(xboxController.getYButton()){
-      return 2;
+      pressedButton = "緑・水色";
+      buttonNumber = 2;
     }else if(xboxController.getXButton()){
-      return  3;
+      pressedButton = "青・紫";
+      buttonNumber = 3;
     }else{
-      return 4;
+      buttonNumber = 4;
     }
+    SmartDashboard.putString("Pressed Button", pressedButton);
+    return buttonNumber;
   }
-
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {}
