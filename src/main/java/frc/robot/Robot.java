@@ -46,27 +46,27 @@ public class Robot extends TimedRobot {
 
   private boolean shouldResetAnser = false;
   private double resetAnserTime = 0.0;
-private int counter;
+  private int counter;
+  String rgb; 
 
   XboxController xboxController;
-
   // 色の定義
-  private static final Map<String, Color> UseColors = new HashMap<>();
+  static final Map<String, Color> UseColors = new HashMap<>();
   static {
     UseColors.put("orange", new Color(255, 50, 0));
     UseColors.put("red", new Color(255, 0, 0));
     UseColors.put("green", new Color(0, 255, 0));
     UseColors.put("blue", new Color(0, 0, 255));
 
-    UseColors.put("yellow", new Color(255/2, 241/2, 0));
-    UseColors.put("darkRed", new Color(235/2, 97/2, 16/2));
-    UseColors.put("lightBlue", new Color(104/2, 200/2, 242/2));
-    UseColors.put("purple", new Color(165/2, 61/2, 146/2));
+    UseColors.put("yellow", new Color(255, 241, 0));
+    UseColors.put("darkRed", new Color(235, 97, 16));
+    UseColors.put("lightBlue", new Color(104, 200, 242));
+    UseColors.put("purple", new Color(165, 61, 146));
 
-    UseColors.put("yellow_new", new Color(225/2,255/2,0/2));
-    UseColors.put("blue_new", new Color(0/2,65/2,255/2));
-    UseColors.put("violet", new Color(150/2,0/2,102/2));
-    UseColors.put("orange_new", new Color(255/2,100/2,0));
+    UseColors.put("yellow_new", new Color(225/255,255/255,0));
+    UseColors.put("blue_new", new Color(0,65/255,255/255));
+    UseColors.put("violet", new Color(150/255,0,102/255));
+    UseColors.put("orange_new", new Color(255/255,100/255,0));
   }
 
 
@@ -165,7 +165,9 @@ private int counter;
           counter++;
           DataLogManager.log(counter + "," + colorName + ",");
           // 光らせる
-          setsolidLED(UseColors.get(colorName));
+          double brightness = 0.1 + 0.9 * 1;// Math.random();
+          // System.out.println(brightness);
+          setSolidLED(UseColors.get(colorName), brightness);
           startTime = Timer.getFPGATimestamp();
           timerStarted = true;
           isWaiting = false;
@@ -208,7 +210,8 @@ private int counter;
           counter++;
           DataLogManager.log(counter + "," + colorName + ",");
           // 光らせる
-          setsolidLED(UseColors.get(colorName));
+          double brightness = 0.1 + 0.9 * 1;//Math.random();
+          setSolidLED(UseColors.get(colorName), brightness);
           startTime = Timer.getFPGATimestamp();
           timerStarted = true;
           isWaiting = false;
@@ -253,7 +256,7 @@ private int counter;
       // 光らせる
       switch (LEDPatternNumber){
         case 0:
-          setsolidLED(Color.kWhite); // 点灯
+          setSolidLED(Color.kWhite, 1); // 点灯
           break;
         case 1:
           blinkWhite(Color.kWhite,0.1); // 早い点滅（0.3秒）
@@ -304,7 +307,7 @@ private int counter;
       // 光らせる
       switch (LEDPatternNumber){
         case 0:
-          setsolidLED(UseColors.get(fourModecolors[0])); // 点灯
+          setSolidLED(UseColors.get(fourModecolors[0]), 1); // 点灯
           break;
         case 1:
           blinkWhite(UseColors.get(fourModecolors[1]),0.1); // 早い点滅（0.3秒）
@@ -351,7 +354,8 @@ private int counter;
           counter++;
           DataLogManager.log(counter + "," + colorName + ",");
           // 光らせる
-          setsolidLED(UseColors.get(colorName));
+          double brightness = 0.3 + 0.7 * 1;//Math.random();
+          setSolidLED(UseColors.get(colorName), brightness);
           startTime = Timer.getFPGATimestamp();
           timerStarted = true;
           isWaiting = false;
@@ -379,7 +383,15 @@ private int counter;
     Random rand = new Random();
     return rand.nextInt(4);
   }
-
+  /** γ=2.2のガンマ補正を使ってColorに明るさ係数を適用 */
+  public Color applyBrightness(Color color, double brightness) {
+    double gamma = 1.0;
+    // 線形空間に変換してから明るさを乗算し、再びガンマ空間に戻す
+    double r = Math.pow(Math.pow(color.red, gamma) * brightness, 1.0 / gamma);
+    double g = Math.pow(Math.pow(color.green, gamma) * brightness, 1.0 / gamma);
+    double b = Math.pow(Math.pow(color.blue, gamma) * brightness, 1.0 / gamma);
+    return new Color(r, g, b);
+  }
   public void setsolidLED(Color color){
     // Create an LED pattern that sets the entire strip to solid red
     LEDPattern red = LEDPattern.solid(color);
@@ -391,6 +403,24 @@ private int counter;
     led.setData(ledBuffer);
     led.start();
   }
+/** Sets all LEDs to a single color scaled by the given brightness. */
+  public void setSolidLED(Color color, double brightness) {
+    Color bright = applyBrightness(color, brightness);
+    // WPILib AddressableLEDBuffer expects int RGB 0–255
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+        ledBuffer.setRGB(i,
+            (int)(bright.red   * 255),
+            (int)(bright.green * 255),
+            (int)(bright.blue  * 255));
+    }
+    // System.out.println(bright.red * 255);
+    // System.out.println(bright.blue * 255);
+    // System.out.println(bright.green * 255);
+    // System.out.println(bright);
+    // Send buffer to LED strip (common WPILib pattern):contentReference[oaicite:8]{index=8}
+    led.setData(ledBuffer);
+    led.start();
+  }
 
   // 点滅
   public void blinkWhite(Color color ,double intervalSeconds) {
@@ -398,7 +428,7 @@ private int counter;
     double period = intervalSeconds * 2;
 
     if ((time % period) < intervalSeconds) {
-      setsolidLED(color);
+      setSolidLED(color, 1);
     } else {
       setsolidLED(new Color(0,0,0));
     }
